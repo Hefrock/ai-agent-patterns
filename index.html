@@ -773,7 +773,7 @@ function flowDiagramSVG(p) {
   const hasCluster = items.some(it => it.kind);
   const topPad = (p.loop ? 30 : 0) + (hasCluster ? 22 : 12);
   const rowCenterY = topPad + maxClusterH / 2;
-  const bottomPad = p.loop ? 50 : 12;
+  const bottomPad = p.loop ? 64 : 12;
   const totalH = Math.round(rowCenterY + maxClusterH / 2 + bottomPad);
 
   let x = 10;
