@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Agent Design Patterns</title>
+<meta name="description" content="A comprehensive interactive reference of AI agent design patterns — single-agent and multi-agent architectures with expandable detail cards.">
+<style>
+  /* ── Reset ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  /* ── Design tokens ── */
+  :root {
+    --accent:       #534AB7;
+    --accent-light: #EEEDFE;
+    --accent-mid:   #7F77DD;
+    --teal:         #0F6E56;
+    --teal-light:   #E1F5EE;
+    --teal-mid:     #1D9E75;
+    --coral:        #993C1D;
+    --coral-light:  #FAECE7;
+    --coral-mid:    #D85A30;
+    --amber:        #854F0B;
+    --amber-light:  #FAEEDA;
+    --amber-mid:    #EF9F27;
+
+    --bg:           #ffffff;
+    --bg2:          #F7F6F2;
+    --bg3:          #EFEDE8;
+    --border:       rgba(0,0,0,0.08);
+    --border-mid:   rgba(0,0,0,0.14);
+    --text-primary: #1a1917;
+    --text-secondary: #5c5a55;
+    --text-tertiary:  #9c9a94;
+
+    --radius-sm:  6px;
+    --radius-md:  10px;
+    --radius-lg:  14px;
+    --radius-xl:  20px;
+
+    --font-sans: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+    --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+    --transition: 160ms ease;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --accent:       #AFA9EC;
+      --accent-light: #1e1a4a;
+      --accent-mid:   #7F77DD;
+      --teal:         #9FE1CB;
+      --teal-light:   #062a20;
+      --teal-mid:     #1D9E75;
+      --coral:        #F0997B;
+      --coral-light:  #2d0f04;
+      --coral-mid:    #D85A30;
+      --amber:        #FAC775;
+      --amber-light:  #2a1800;
+      --amber-mid:    #EF9F27;
+
+      --bg:           #111110;
+      --bg2:          #1a1917;
+      --bg3:          #232220;
+      --border:       rgba(255,255,255,0.08);
+      --border-mid:   rgba(255,255,255,0.14);
+      --text-primary: #eeecea;
+      --text-secondary: #a8a69f;
+      --text-tertiary:  #6a6864;
+    }
+  }
+
+  /* ── Theme overrides (JS-applied) ── */
+  .theme-ocean {
+    --accent: #185FA5; --accent-light: #E6F1FB; --accent-mid: #378ADD;
+    --teal: #0F6E56;   --teal-light: #E1F5EE;   --teal-mid: #1D9E75;
+    --amber: #854F0B;  --amber-light: #FAEEDA;  --amber-mid: #EF9F27;
+  }
+  .theme-slate {
+    --accent: #444441; --accent-light: #F1EFE8; --accent-mid: #888780;
+    --teal: #3B6D11;   --teal-light: #EAF3DE;   --teal-mid: #639922;
+    --coral: #185FA5;  --coral-light: #E6F1FB;  --coral-mid: #378ADD;
+  }
+  .theme-warm {
+    --accent: #993556; --accent-light: #FBEAF0; --accent-mid: #D4537E;
+    --teal: #854F0B;   --teal-light: #FAEEDA;   --teal-mid: #EF9F27;
+    --coral: #993C1D;  --coral-light: #FAECE7;  --coral-mid: #D85A30;
+  }
+
+  /* ── Base ── */
+  body {
+    font-family: var(--font-sans);
+    background: var(--bg);
+    color: var(--text-primary);
+    line-height: 1.6;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── Page layout ── */
+  .page-wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px 80px; }
+
+  /* ── Header ── */
+  .site-header {
+    padding: 48px 24px 0;
+    max-width: 1080px;
+    margin: 0 auto 36px;
+  }
+  .header-eyebrow {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+  .header-title {
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 700;
+    letter-spacing: -.02em;
+    color: var(--text-primary);
+    line-height: 1.1;
+    margin-bottom: 14px;
+  }
+  .header-title span { color: var(--accent); }
+  .header-sub {
+    font-size: 16px;
+    color: var(--text-secondary);
+    max-width: 560px;
+    line-height: 1.65;
+  }
+
+  /* ── Toolbar ── */
+  .toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 16px;
+    padding: 14px 16px;
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 24px;
+  }
+  .toolbar-group { display: flex; align-items: center; gap: 6px; }
+  .toolbar-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    white-space: nowrap;
+  }
+  .btn-row { display: flex; gap: 3px; }
+  .tbtn {
+    font-size: 12px;
+    font-family: var(--font-sans);
+    padding: 5px 11px;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border-mid);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+  }
+  .tbtn:hover { background: var(--bg3); color: var(--text-primary); }
+  .tbtn.active {
+    background: var(--accent-light);
+    color: var(--accent);
+    border-color: var(--accent-mid);
+    font-weight: 600;
+  }
+  .divider { width: 1px; height: 20px; background: var(--border-mid); }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    margin-bottom: 28px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-secondary); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── Section label ── */
+  .section-row {
+    grid-column: 1 / -1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 0 4px;
+  }
+  .section-row:first-child { padding-top: 0; }
+  .section-title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    white-space: nowrap;
+  }
+  .section-line { flex: 1; height: 0.5px; background: var(--border); }
+
+  /* ── Grid ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    cursor: pointer;
+    transition: border-color var(--transition), box-shadow var(--transition);
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--card-accent, transparent);
+    transition: opacity var(--transition);
+  }
+  .card:hover { border-color: var(--border-mid); }
+  .card.expanded {
+    grid-column: 1 / -1;
+    border-color: var(--accent-mid);
+    cursor: default;
+  }
+  .card.expanded::before { background: var(--accent-mid); }
+
+  /* card accent bar colors by category */
+  .card[data-cat="llm"]   { --card-accent: var(--accent-mid); }
+  .card[data-cat="tool"]  { --card-accent: var(--coral-mid); }
+  .card[data-cat="data"]  { --card-accent: var(--teal-mid); }
+  .card[data-cat="multi"] { --card-accent: var(--amber-mid); }
+
+  .card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; margin-bottom: 8px; }
+  .card-name { font-size: 13px; font-weight: 600; color: var(--text-primary); line-height: 1.3; }
+  .card-sub  { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; line-height: 1.4; }
+
+  /* pill */
+  .pill {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 20px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .pill-llm   { background: var(--accent-light); color: var(--accent); }
+  .pill-tool  { background: var(--coral-light);  color: var(--coral); }
+  .pill-data  { background: var(--teal-light);   color: var(--teal); }
+  .pill-multi { background: var(--amber-light);  color: var(--amber); }
+
+  /* flow badges */
+  .flow-row { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 8px; }
+  .flow-badge {
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    background: var(--bg3);
+    color: var(--text-secondary);
+    font-family: var(--font-mono);
+  }
+
+  /* expand body */
+  .expand-body {
+    display: none;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 0.5px solid var(--border);
+    gap: 24px;
+  }
+  .card.expanded .expand-body { display: grid; grid-template-columns: 1fr 280px; }
+
+  @media (max-width: 640px) {
+    .card.expanded .expand-body { grid-template-columns: 1fr; }
+  }
+
+  .expand-desc {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+  .expand-uses {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--text-tertiary);
+  }
+  .expand-uses strong { color: var(--text-secondary); }
+
+  .expand-meta {
+    background: var(--bg2);
+    border-radius: var(--radius-md);
+    padding: 14px;
+    font-size: 12px;
+  }
+  .meta-title {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--text-tertiary);
+    margin-bottom: 10px;
+  }
+  .meta-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .meta-row:last-of-type { border-bottom: none; }
+  .meta-key { color: var(--text-tertiary); }
+  .meta-val { font-weight: 600; color: var(--text-primary); }
+
+  .expand-flow {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 0.5px solid var(--border);
+  }
+
+  .close-btn {
+    position: absolute;
+    top: 12px; right: 14px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: var(--text-tertiary);
+    cursor: pointer;
+    line-height: 1;
+    padding: 2px 4px;
+    border-radius: 4px;
+    transition: color var(--transition), background var(--transition);
+  }
+  .close-btn:hover { color: var(--text-primary); background: var(--bg3); }
+
+  .deep-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 14px;
+    font-size: 12px;
+    font-family: var(--font-sans);
+    padding: 7px 13px;
+    border-radius: var(--radius-sm);
+    border: 0.5px solid var(--border-mid);
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition);
+  }
+  .deep-btn:hover { background: var(--bg3); color: var(--text-primary); }
+
+  /* ── Footer ── */
+  .site-footer {
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 0.5px solid var(--border);
+    font-size: 12px;
+    color: var(--text-tertiary);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* ── Compact label toggle ── */
+  .compact .card-sub  { display: none; }
+  .compact .flow-row  { display: none; }
+  .compact .card-name { font-size: 12px; }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-eyebrow">Reference · 2026</div>
+  <h1 class="header-title">AI agent <span>design patterns</span></h1>
+  <p class="header-sub">A comprehensive reference of single-agent and multi-agent architectures. Click any card to expand. Use the controls to adjust theme, density, and labels.</p>
+</header>
+
+<main class="page-wrap">
+
+  <!-- Toolbar -->
+  <div class="toolbar" role="toolbar" aria-label="Display controls">
+    <div class="toolbar-group">
+      <span class="toolbar-label">Theme</span>
+      <div class="btn-row" id="theme-btns">
+        <button class="tbtn active" onclick="setTheme('default',this)">Default</button>
+        <button class="tbtn" onclick="setTheme('ocean',this)">Ocean</button>
+        <button class="tbtn" onclick="setTheme('slate',this)">Slate</button>
+        <button class="tbtn" onclick="setTheme('warm',this)">Warm</button>
+      </div>
+    </div>
+    <div class="divider" aria-hidden="true"></div>
+    <div class="toolbar-group">
+      <span class="toolbar-label">Density</span>
+      <div class="btn-row" id="density-btns">
+        <button class="tbtn" onclick="setDensity('compact',this)">Compact</button>
+        <button class="tbtn active" onclick="setDensity('normal',this)">Normal</button>
+        <button class="tbtn" onclick="setDensity('loose',this)">Loose</button>
+      </div>
+    </div>
+    <div class="divider" aria-hidden="true"></div>
+    <div class="toolbar-group">
+      <span class="toolbar-label">Labels</span>
+      <div class="btn-row" id="label-btns">
+        <button class="tbtn active" onclick="setLabels('full',this)">Full</button>
+        <button class="tbtn" onclick="setLabels('compact',this)">Minimal</button>
+      </div>
+    </div>
+    <div class="divider" aria-hidden="true"></div>
+    <div class="toolbar-group">
+      <span class="toolbar-label">Filter</span>
+      <div class="btn-row" id="filter-btns">
+        <button class="tbtn active" onclick="setFilter('all',this)">All</button>
+        <button class="tbtn" onclick="setFilter('single',this)">Single-agent</button>
+        <button class="tbtn" onclick="setFilter('multi',this)">Multi-agent</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend" aria-label="Color legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--accent-mid)"></div>LLM / reasoning</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--teal-mid)"></div>Data / memory</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--coral-mid)"></div>Tool / action</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--amber-mid)"></div>Multi-agent</div>
+  </div>
+
+  <!-- Grid -->
+  <div class="grid" id="grid" role="list"></div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <span>AI Agent Design Patterns · Interactive Reference</span>
+    <span>Click any card to expand · Built with Claude</span>
+  </footer>
+
+</main>
+
+<script>
+const PATTERNS = [
+  {
+    section: "Single-agent — stateless",
+    group: "single",
+    name: "Simple LLM call",
+    sub: "One prompt, one response",
+    cat: "llm", catLabel: "LLM core",
+    desc: "The most primitive pattern. A prompt goes in, the model returns a completion. No loops, no tools, no memory. Useful for classification, summarization, and one-shot generation where a single inference is sufficient.",
+    uses: "Classification, summarization, translation, Q&A",
+    complexity: "Low",
+    agents: "1",
+    loops: "None",
+    statefulness: "Stateless",
+    flow: ["Prompt", "→ LLM", "→ Response"]
+  },
+  {
+    section: "Single-agent — stateless",
+    group: "single",
+    name: "Prompt chaining",
+    sub: "Sequential LLM steps",
+    cat: "llm", catLabel: "LLM core",
+    desc: "The output of each LLM call becomes the input of the next. Each step can have its own system prompt and focus area. Useful for multi-stage transformations — draft → critique → revise → format — where each pass specializes.",
+    uses: "Document pipelines, multi-stage writing, report generation",
+    complexity: "Low – Med",
+    agents: "1",
+    loops: "None",
+    statefulness: "Stateless",
+    flow: ["Input", "→ Step 1", "→ Step 2", "→ Step N", "→ Output"]
+  },
+  {
+    section: "Single-agent — agentic",
+    group: "single",
+    name: "ReAct loop",
+    sub: "Reason · act · observe",
+    cat: "tool", catLabel: "Tool / action",
+    desc: "The model reasons about what action to take, calls a tool, observes the result, then reasons again. The loop continues until the task is complete or a stop condition is met. The backbone of most practical tool-using agents.",
+    uses: "Research agents, coding assistants, web browsing agents",
+    complexity: "Medium",
+    agents: "1",
+    loops: "Until done",
+    statefulness: "Stateful",
+    flow: ["Task", "→ Reason", "→ Tool call", "→ Observe", "↻ loop or done"]
+  },
+  {
+    section: "Single-agent — agentic",
+    group: "single",
+    name: "Plan-and-execute",
+    sub: "Separate planner and executor",
+    cat: "llm", catLabel: "LLM core",
+    desc: "A planner LLM creates a structured task list from a high-level goal. A separate executor works through each task step by step. Separating planning from execution improves long-horizon coherence and makes failures easier to diagnose.",
+    uses: "Long-horizon tasks, project automation, multi-step research",
+    complexity: "Medium",
+    agents: "1–2",
+    loops: "Per task",
+    statefulness: "Stateful",
+    flow: ["Goal", "→ Planner", "→ Task list", "→ Executor", "→ Result"]
+  },
+  {
+    section: "Single-agent — agentic",
+    group: "single",
+    name: "Tool-use / function calling",
+    sub: "LLM with tool registry",
+    cat: "tool", catLabel: "Tool / action",
+    desc: "The model is given a registry of tools — functions, APIs, search — and can invoke any of them. Tool results are returned as observations. The fundamental building block for any agent that interacts with the world beyond text generation.",
+    uses: "API agents, personal assistants, search-augmented generation",
+    complexity: "Low – Med",
+    agents: "1",
+    loops: "Optional",
+    statefulness: "Stateful",
+    flow: ["Prompt", "→ LLM + tools", "→ Tool call", "→ Observation", "→ Response"]
+  },
+  {
+    section: "Single-agent — agentic",
+    group: "single",
+    name: "Critic / self-refinement",
+    sub: "Generator + critic loop",
+    cat: "llm", catLabel: "LLM core",
+    desc: "A generator produces a draft. A critic (same or separate model) evaluates it and returns structured feedback. The generator revises based on that critique. Loops until quality threshold is met or iteration cap is hit.",
+    uses: "Code review, legal/factual QA, writing polish, safety checks",
+    complexity: "Medium",
+    agents: "1–2",
+    loops: "Until satisfied",
+    statefulness: "Stateful",
+    flow: ["Task", "→ Generator", "→ Critic", "→ Feedback", "↻ revise or done"]
+  },
+  {
+    section: "Single-agent — memory",
+    group: "single",
+    name: "RAG pattern",
+    sub: "Retrieve then reason",
+    cat: "data", catLabel: "Data / memory",
+    desc: "Before generating, the agent retrieves relevant documents or chunks from a vector store or search index. Retrieved context is injected into the prompt. Keeps the model grounded in real data without fine-tuning. The standard pattern for knowledge-base Q&A.",
+    uses: "Knowledge bases, customer support, QA over documents",
+    complexity: "Medium",
+    agents: "1",
+    loops: "None",
+    statefulness: "Stateless",
+    flow: ["Query", "→ Retriever", "→ Context", "→ LLM", "→ Answer"]
+  },
+  {
+    section: "Single-agent — memory",
+    group: "single",
+    name: "Memory-augmented agent",
+    sub: "Short, long & episodic memory",
+    cat: "data", catLabel: "Data / memory",
+    desc: "The agent maintains multiple memory tiers: working memory (current context window), episodic memory (past conversation summaries), and long-term memory (a persistent vector or key-value store). Each tier is read and written at appropriate points in the conversation.",
+    uses: "Personal assistants, long-running agents, continuous workflows",
+    complexity: "High",
+    agents: "1",
+    loops: "Continuous",
+    statefulness: "Persistent",
+    flow: ["Input", "→ Memory read", "→ LLM", "→ Memory write", "→ Output"]
+  },
+  {
+    section: "Single-agent — reactive",
+    group: "single",
+    name: "Event-driven / reactive",
+    sub: "Trigger-based activation",
+    cat: "tool", catLabel: "Tool / action",
+    desc: "The agent sits idle and activates on external events — webhooks, queue messages, file changes, cron triggers. Each event starts an isolated agent run. Well-suited for background automation that operates without a human in the loop.",
+    uses: "Monitoring, CI/CD agents, notification handlers, data pipelines",
+    complexity: "Low – Med",
+    agents: "1",
+    loops: "Per event",
+    statefulness: "Stateless",
+    flow: ["Event trigger", "→ Agent run", "→ Action / output", "→ Idle"]
+  },
+  {
+    section: "Multi-agent — cooperative",
+    group: "multi",
+    name: "Orchestrator-worker",
+    sub: "Fan-out · fan-in",
+    cat: "multi", catLabel: "Multi-agent",
+    desc: "A central orchestrator decomposes a task into parallel subtasks and dispatches them to specialized worker agents. Workers run concurrently and return results. An aggregator synthesizes them into a final output. Best when subtasks are independent.",
+    uses: "Research + writing, parallel data processing, competitive analysis",
+    complexity: "High",
+    agents: "3–10",
+    loops: "None",
+    statefulness: "Stateful",
+    flow: ["Task", "→ Orchestrator", "→ Workers ×N (parallel)", "→ Aggregator", "→ Output"]
+  },
+  {
+    section: "Multi-agent — cooperative",
+    group: "multi",
+    name: "Sequential pipeline",
+    sub: "Specialist handoff chain",
+    cat: "multi", catLabel: "Multi-agent",
+    desc: "Each agent in the chain is a domain specialist. The output of one becomes the input of the next. Unlike prompt chaining, these are distinct agents with different tools, prompts, and contexts. Quality compounds at each stage — but so do failures.",
+    uses: "RAG → reason → validate → format workflows, editorial pipelines",
+    complexity: "Medium",
+    agents: "3–6",
+    loops: "None",
+    statefulness: "Stateful",
+    flow: ["Input", "→ Agent A", "→ Agent B", "→ Agent C", "→ Output"]
+  },
+  {
+    section: "Multi-agent — cooperative",
+    group: "multi",
+    name: "Cooperative multi-agent",
+    sub: "Shared workspace",
+    cat: "multi", catLabel: "Multi-agent",
+    desc: "Multiple agents share a workspace — a document, a code repo, a message bus — and collaborate on the same task. A coordinator routes work and resolves conflicts. A synthesizer merges contributions. High coordination overhead but enables parallel specialization.",
+    uses: "Software development teams, collaborative writing, research synthesis",
+    complexity: "Very high",
+    agents: "4–12",
+    loops: "Per agent",
+    statefulness: "Persistent",
+    flow: ["Problem", "→ Coordinator", "→ Agent cluster", "→ Synthesizer", "→ Solution"]
+  },
+  {
+    section: "Multi-agent — competitive",
+    group: "multi",
+    name: "Competitive / debate",
+    sub: "Independent agents, evaluator selects",
+    cat: "multi", catLabel: "Multi-agent",
+    desc: "Multiple independent agents each propose a solution to the same problem. An evaluator agent scores each proposal and selects the best — or integrates elements from multiple proposals. Improves solution quality through diversity of approaches.",
+    uses: "Strategy generation, creative ideation, factual verification",
+    complexity: "High",
+    agents: "3–8",
+    loops: "None",
+    statefulness: "Stateless",
+    flow: ["Problem", "→ Agents A/B/C", "→ Solutions", "→ Evaluator", "→ Best answer"]
+  },
+  {
+    section: "Multi-agent — hierarchical",
+    group: "multi",
+    name: "Hierarchical multi-tier",
+    sub: "Strategic → tactical → execution",
+    cat: "multi", catLabel: "Multi-agent",
+    desc: "A strategic planner sets high-level goals. Mid-tier sub-planners break those into domain-specific operations. Leaf-level executor agents carry out individual actions. Each tier operates at a different level of abstraction. Common in enterprise agent frameworks.",
+    uses: "Enterprise automation, complex project management, large-scale coding",
+    complexity: "Very high",
+    agents: "6–20+",
+    loops: "Per tier",
+    statefulness: "Persistent",
+    flow: ["Goal", "→ Planner", "→ Sub-planners", "→ Executors", "→ Output"]
+  },
+  {
+    section: "Multi-agent — routing",
+    group: "multi",
+    name: "Router / mixture of experts",
+    sub: "Intent-based dispatch",
+    cat: "multi", catLabel: "Multi-agent",
+    desc: "A router model classifies each incoming request by content or intent and dispatches it to the most appropriate specialist agent. Each specialist handles only the domain it is optimized for. Reduces cost and latency vs. using one large general-purpose model for everything.",
+    uses: "Customer support, multi-domain assistants, cost-optimized pipelines",
+    complexity: "Medium",
+    agents: "3–8",
+    loops: "None",
+    statefulness: "Stateless",
+    flow: ["Input", "→ Router", "→ Specialist A or B or C", "→ Response"]
+  }
+];
+
+let expandedIdx = null;
+let currentFilter = 'all';
+let currentLabels = 'full';
+
+function setTheme(t, btn) {
+  document.body.classList.remove('theme-ocean','theme-slate','theme-warm');
+  if (t !== 'default') document.body.classList.add('theme-' + t);
+  document.querySelectorAll('#theme-btns .tbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function setDensity(d, btn) {
+  const g = document.getElementById('grid');
+  const gaps = { compact: '6px', normal: '10px', loose: '16px' };
+  const mins  = { compact: '160px', normal: '200px', loose: '240px' };
+  g.style.gap = gaps[d];
+  g.style.gridTemplateColumns = `repeat(auto-fill, minmax(${mins[d]}, 1fr))`;
+  document.querySelectorAll('#density-btns .tbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function setLabels(mode, btn) {
+  currentLabels = mode;
+  const grid = document.getElementById('grid');
+  grid.classList.toggle('compact', mode === 'compact');
+  document.querySelectorAll('#label-btns .tbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('#filter-btns .tbtn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGrid();
+}
+
+function toggleCard(idx) {
+  if (expandedIdx === idx) {
+    expandedIdx = null;
+  } else {
+    expandedIdx = idx;
+  }
+  renderGrid();
+  if (expandedIdx !== null) {
+    requestAnimationFrame(() => {
+      const el = document.querySelector('.card.expanded');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    });
+  }
+}
+
+function renderGrid() {
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '';
+
+  const filtered = PATTERNS.map((p, i) => ({ ...p, origIdx: i }))
+    .filter(p => currentFilter === 'all' || p.group === currentFilter);
+
+  let lastSection = '';
+
+  filtered.forEach((p) => {
+    if (p.section !== lastSection) {
+      lastSection = p.section;
+      const sec = document.createElement('div');
+      sec.className = 'section-row';
+      sec.setAttribute('role', 'presentation');
+      sec.innerHTML = `<span class="section-title">${p.section}</span><div class="section-line"></div>`;
+      grid.appendChild(sec);
+    }
+
+    const card = document.createElement('div');
+    card.className = 'card' + (expandedIdx === p.origIdx ? ' expanded' : '');
+    card.setAttribute('data-cat', p.cat);
+    card.setAttribute('role', 'listitem');
+    card.setAttribute('aria-expanded', expandedIdx === p.origIdx ? 'true' : 'false');
+
+    const flowBadges = p.flow.map(f => `<span class="flow-badge">${f}</span>`).join('');
+
+    card.innerHTML = `
+      <div class="card-head">
+        <div>
+          <div class="card-name">${p.name}</div>
+          <div class="card-sub">${p.sub}</div>
+        </div>
+        <span class="pill pill-${p.cat}">${p.catLabel}</span>
+      </div>
+      <div class="flow-row">${flowBadges}</div>
+      <div class="expand-body" aria-hidden="${expandedIdx === p.origIdx ? 'false' : 'true'}">
+        <button class="close-btn" aria-label="Close" onclick="event.stopPropagation(); toggleCard(${p.origIdx})">×</button>
+        <div class="expand-desc">
+          ${p.desc}
+          <div class="expand-uses"><strong>Common uses:</strong> ${p.uses}</div>
+          <button class="deep-btn" onclick="event.stopPropagation(); alert('Open this in Claude chat to deep dive: \'Explain the ${p.name} pattern with a real implementation example\'')">
+            Deep dive ↗
+          </button>
+        </div>
+        <div class="expand-meta">
+          <div class="meta-title">At a glance</div>
+          <div class="meta-row"><span class="meta-key">Complexity</span><span class="meta-val">${p.complexity}</span></div>
+          <div class="meta-row"><span class="meta-key">Agent count</span><span class="meta-val">${p.agents}</span></div>
+          <div class="meta-row"><span class="meta-key">Loop type</span><span class="meta-val">${p.loops}</span></div>
+          <div class="meta-row"><span class="meta-key">Statefulness</span><span class="meta-val">${p.statefulness}</span></div>
+          <div class="expand-flow">
+            <div class="meta-title" style="margin-bottom:6px">Flow</div>
+            <div class="flow-row">${flowBadges}</div>
+          </div>
+        </div>
+      </div>`;
+
+    card.addEventListener('click', () => {
+      if (expandedIdx !== p.origIdx) toggleCard(p.origIdx);
+    });
+
+    grid.appendChild(card);
+  });
+}
+
+renderGrid();
+</script>
+</body>
+</html>

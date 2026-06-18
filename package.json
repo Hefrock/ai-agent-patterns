@@ -1,0 +1,14 @@
+{
+  "name": "ai-agent-patterns",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Export tooling for the AI Agent Design Patterns interactive reference",
+  "scripts": {
+    "export:images": "node scripts/export-images.js",
+    "export:pptx": "node scripts/export-pptx.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.47.0",
+    "pptxgenjs": "^3.12.0"
+  }
+}
