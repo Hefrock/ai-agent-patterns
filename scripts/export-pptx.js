@@ -75,7 +75,7 @@ function addPatternCard(slide, p, x, y, w, h) {
     fontFace: 'Arial', fontSize: 10, color: '5C5A55',
   });
 
-  slide.addText(p.flow.join('  '), {
+  slide.addText(p.flow.map(f => f.label).join('  →  '), {
     x: x + 0.2, y: y + 0.9, w: w - 0.4, h: h - 1.05,
     fontFace: 'Courier New', fontSize: 9, color: '5C5A55', valign: 'top',
   });

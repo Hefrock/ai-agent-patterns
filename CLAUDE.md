@@ -77,9 +77,23 @@ hardcode any hex values outside the token definitions.
   agents: string,       // count or range
   loops: string,
   statefulness: string,
-  flow: string[]        // ordered steps as short labels
+  loop: boolean,         // optional — renders a loop-back-to-step-2 + Done node
+  flow: {                // ordered steps, each rendered as an SVG diagram node
+    label: string,
+    cat: 'neutral'|'llm'|'tool'|'data'|'multi',
+    kind: 'parallel'|'branch',  // optional — renders this step as a fan-out cluster
+    members: string[]           // required when kind is set — sub-node labels
+  }[]
 }
 ```
+
+The `flow` array drives the per-pattern SVG diagram (`flowDiagramSVG` in
+`index.html`) shown in the expanded card view. `cat` maps to the same
+color legend as the card's `cat` field (`neutral` = gray, `llm` = purple,
+`tool` = coral, `data` = teal, `multi` = amber). Steps with `kind` render
+as a dashed group box containing one node per `members` entry — `parallel`
+draws solid fan-out/fan-in edges (AND semantics), `branch` draws dashed
+edges (exclusive-OR / "choose one" semantics).
 
 ---
 

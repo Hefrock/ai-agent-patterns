@@ -272,6 +272,34 @@
     font-family: var(--font-mono);
   }
 
+  /* ── Flow diagram (SVG) ── */
+  .diagram-wrap {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px 12px;
+    margin-top: 8px;
+  }
+  .diagram { display: block; width: 100%; height: auto; font-family: var(--font-sans); }
+
+  .node-label { font-size: 12px; font-weight: 700; letter-spacing: -0.01em; text-anchor: middle; dominant-baseline: middle; }
+  .label-neutral  { fill: var(--text-primary); }
+  .label-on-color { fill: #fff; }
+  .label-on-amber { fill: #1a1917; }
+
+  /* node fills use only the "mid" tokens, which stay constant across light/dark/themes */
+  .node-neutral { fill: var(--bg3); }
+  .node-llm     { fill: var(--accent-mid); filter: url(#nodeShadow); }
+  .node-tool    { fill: var(--coral-mid);  filter: url(#nodeShadow); }
+  .node-data    { fill: var(--teal-mid);   filter: url(#nodeShadow); }
+  .node-multi   { fill: var(--amber-mid);  filter: url(#nodeShadow); }
+
+  .edge-label { font-size: 9px; font-weight: 600; text-anchor: middle; fill: var(--text-tertiary); text-transform: uppercase; letter-spacing: .04em; }
+  .edge { stroke: var(--border-mid); stroke-width: 1.75; fill: none; stroke-linecap: round; }
+  .edge-loop { stroke-dasharray: 3 4; }
+  .edge-branch { stroke-dasharray: 1 3.5; }
+  .group-box { stroke: var(--border-mid); stroke-width: 1; stroke-dasharray: 4 3; fill: none; }
+
   /* expand body */
   .expand-body {
     display: none;
@@ -323,9 +351,7 @@
   .meta-val { font-weight: 600; color: var(--text-primary); }
 
   .expand-flow {
-    margin-top: 12px;
-    padding-top: 12px;
-    border-top: 0.5px solid var(--border);
+    grid-column: 1 / -1;
   }
 
   .close-btn {
@@ -380,6 +406,16 @@
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="6.5" markerHeight="6.5" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" style="fill:var(--border-mid)"></path>
+    </marker>
+    <filter id="nodeShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="1.5" stdDeviation="2.5" flood-opacity="0.22"></feDropShadow>
+    </filter>
+  </defs>
+</svg>
 
 <header class="site-header">
   <div class="header-eyebrow">Reference · 2026</div>
@@ -461,7 +497,9 @@ const PATTERNS = [
     agents: "1",
     loops: "None",
     statefulness: "Stateless",
-    flow: ["Prompt", "→ LLM", "→ Response"]
+    flow: [
+      {label:"Prompt", cat:"neutral"}, {label:"LLM", cat:"llm"}, {label:"Response", cat:"neutral"}
+    ]
   },
   {
     section: "Single-agent — stateless",
@@ -475,7 +513,9 @@ const PATTERNS = [
     agents: "1",
     loops: "None",
     statefulness: "Stateless",
-    flow: ["Input", "→ Step 1", "→ Step 2", "→ Step N", "→ Output"]
+    flow: [
+      {label:"Input", cat:"neutral"}, {label:"Step 1", cat:"llm"}, {label:"Step 2", cat:"llm"}, {label:"Step N", cat:"llm"}, {label:"Output", cat:"neutral"}
+    ]
   },
   {
     section: "Single-agent — agentic",
@@ -489,7 +529,10 @@ const PATTERNS = [
     agents: "1",
     loops: "Until done",
     statefulness: "Stateful",
-    flow: ["Task", "→ Reason", "→ Tool call", "→ Observe", "↻ loop or done"]
+    loop: true,
+    flow: [
+      {label:"Task", cat:"neutral"}, {label:"Reason", cat:"llm"}, {label:"Tool call", cat:"tool"}, {label:"Observe", cat:"data"}
+    ]
   },
   {
     section: "Single-agent — agentic",
@@ -503,7 +546,9 @@ const PATTERNS = [
     agents: "1–2",
     loops: "Per task",
     statefulness: "Stateful",
-    flow: ["Goal", "→ Planner", "→ Task list", "→ Executor", "→ Result"]
+    flow: [
+      {label:"Goal", cat:"neutral"}, {label:"Planner", cat:"llm"}, {label:"Task list", cat:"data"}, {label:"Executor", cat:"tool"}, {label:"Result", cat:"neutral"}
+    ]
   },
   {
     section: "Single-agent — agentic",
@@ -517,7 +562,9 @@ const PATTERNS = [
     agents: "1",
     loops: "Optional",
     statefulness: "Stateful",
-    flow: ["Prompt", "→ LLM + tools", "→ Tool call", "→ Observation", "→ Response"]
+    flow: [
+      {label:"Prompt", cat:"neutral"}, {label:"LLM + tools", cat:"llm"}, {label:"Tool call", cat:"tool"}, {label:"Observation", cat:"data"}, {label:"Response", cat:"neutral"}
+    ]
   },
   {
     section: "Single-agent — agentic",
@@ -531,7 +578,10 @@ const PATTERNS = [
     agents: "1–2",
     loops: "Until satisfied",
     statefulness: "Stateful",
-    flow: ["Task", "→ Generator", "→ Critic", "→ Feedback", "↻ revise or done"]
+    loop: true,
+    flow: [
+      {label:"Task", cat:"neutral"}, {label:"Generator", cat:"llm"}, {label:"Critic", cat:"llm"}, {label:"Feedback", cat:"data"}
+    ]
   },
   {
     section: "Single-agent — memory",
@@ -545,7 +595,9 @@ const PATTERNS = [
     agents: "1",
     loops: "None",
     statefulness: "Stateless",
-    flow: ["Query", "→ Retriever", "→ Context", "→ LLM", "→ Answer"]
+    flow: [
+      {label:"Query", cat:"neutral"}, {label:"Retriever", cat:"data"}, {label:"Context", cat:"data"}, {label:"LLM", cat:"llm"}, {label:"Answer", cat:"neutral"}
+    ]
   },
   {
     section: "Single-agent — memory",
@@ -559,7 +611,9 @@ const PATTERNS = [
     agents: "1",
     loops: "Continuous",
     statefulness: "Persistent",
-    flow: ["Input", "→ Memory read", "→ LLM", "→ Memory write", "→ Output"]
+    flow: [
+      {label:"Input", cat:"neutral"}, {label:"Memory read", cat:"data"}, {label:"LLM", cat:"llm"}, {label:"Memory write", cat:"data"}, {label:"Output", cat:"neutral"}
+    ]
   },
   {
     section: "Single-agent — reactive",
@@ -573,7 +627,9 @@ const PATTERNS = [
     agents: "1",
     loops: "Per event",
     statefulness: "Stateless",
-    flow: ["Event trigger", "→ Agent run", "→ Action / output", "→ Idle"]
+    flow: [
+      {label:"Event trigger", cat:"neutral"}, {label:"Agent run", cat:"llm"}, {label:"Action / output", cat:"tool"}, {label:"Idle", cat:"neutral"}
+    ]
   },
   {
     section: "Multi-agent — cooperative",
@@ -587,7 +643,11 @@ const PATTERNS = [
     agents: "3–10",
     loops: "None",
     statefulness: "Stateful",
-    flow: ["Task", "→ Orchestrator", "→ Workers ×N (parallel)", "→ Aggregator", "→ Output"]
+    flow: [
+      {label:"Task", cat:"neutral"}, {label:"Orchestrator", cat:"llm"},
+      {label:"Workers", cat:"multi", kind:"parallel", members:["Worker 1","Worker 2","Worker 3"]},
+      {label:"Aggregator", cat:"llm"}, {label:"Output", cat:"neutral"}
+    ]
   },
   {
     section: "Multi-agent — cooperative",
@@ -601,7 +661,9 @@ const PATTERNS = [
     agents: "3–6",
     loops: "None",
     statefulness: "Stateful",
-    flow: ["Input", "→ Agent A", "→ Agent B", "→ Agent C", "→ Output"]
+    flow: [
+      {label:"Input", cat:"neutral"}, {label:"Agent A", cat:"multi"}, {label:"Agent B", cat:"multi"}, {label:"Agent C", cat:"multi"}, {label:"Output", cat:"neutral"}
+    ]
   },
   {
     section: "Multi-agent — cooperative",
@@ -615,7 +677,11 @@ const PATTERNS = [
     agents: "4–12",
     loops: "Per agent",
     statefulness: "Persistent",
-    flow: ["Problem", "→ Coordinator", "→ Agent cluster", "→ Synthesizer", "→ Solution"]
+    flow: [
+      {label:"Problem", cat:"neutral"}, {label:"Coordinator", cat:"llm"},
+      {label:"Agent cluster", cat:"multi", kind:"parallel", members:["Agent 1","Agent 2","Agent 3"]},
+      {label:"Synthesizer", cat:"llm"}, {label:"Solution", cat:"neutral"}
+    ]
   },
   {
     section: "Multi-agent — competitive",
@@ -629,7 +695,11 @@ const PATTERNS = [
     agents: "3–8",
     loops: "None",
     statefulness: "Stateless",
-    flow: ["Problem", "→ Agents A/B/C", "→ Solutions", "→ Evaluator", "→ Best answer"]
+    flow: [
+      {label:"Problem", cat:"neutral"},
+      {label:"Agents", cat:"multi", kind:"parallel", members:["Agent A","Agent B","Agent C"]},
+      {label:"Solutions", cat:"data"}, {label:"Evaluator", cat:"llm"}, {label:"Best answer", cat:"neutral"}
+    ]
   },
   {
     section: "Multi-agent — hierarchical",
@@ -643,7 +713,12 @@ const PATTERNS = [
     agents: "6–20+",
     loops: "Per tier",
     statefulness: "Persistent",
-    flow: ["Goal", "→ Planner", "→ Sub-planners", "→ Executors", "→ Output"]
+    flow: [
+      {label:"Goal", cat:"neutral"}, {label:"Planner", cat:"llm"},
+      {label:"Sub-planners", cat:"multi", kind:"parallel", members:["Sub-planner 1","Sub-planner 2"]},
+      {label:"Executors", cat:"multi", kind:"parallel", members:["Executor 1","Executor 2","Executor 3"]},
+      {label:"Output", cat:"neutral"}
+    ]
   },
   {
     section: "Multi-agent — routing",
@@ -657,13 +732,136 @@ const PATTERNS = [
     agents: "3–8",
     loops: "None",
     statefulness: "Stateless",
-    flow: ["Input", "→ Router", "→ Specialist A or B or C", "→ Response"]
+    flow: [
+      {label:"Input", cat:"neutral"}, {label:"Router", cat:"llm"},
+      {label:"Specialists", cat:"multi", kind:"branch", members:["Specialist A","Specialist B","Specialist C"]},
+      {label:"Response", cat:"neutral"}
+    ]
   }
 ];
 
 let expandedIdx = null;
 let currentFilter = 'all';
 let currentLabels = 'full';
+
+/* ── Flow diagram (SVG) renderer ──
+   Generic, data-driven layout so all 15 patterns render with identical
+   spacing/sizing rules. Handles plain sequences, parallel fan-out/fan-in
+   clusters, exclusive-OR branch clusters, and loop-back-with-done. */
+const NODE_H = 40, GAP_X = 34, MEMBER_H = 34, MEMBER_GAP_Y = 9;
+
+function nodeWidth(label) {
+  return Math.min(150, Math.max(74, Math.round(label.length * 7.2) + 28));
+}
+function labelClass(cat) {
+  if (cat === 'neutral') return 'label-neutral';
+  if (cat === 'multi') return 'label-on-amber';
+  return 'label-on-color';
+}
+
+function flowDiagramSVG(p) {
+  const items = p.flow.map(step => {
+    if (step.kind) {
+      const w = Math.max(...step.members.map(nodeWidth));
+      const clusterH = step.members.length * MEMBER_H + (step.members.length - 1) * MEMBER_GAP_Y;
+      return Object.assign({}, step, { w, clusterH });
+    }
+    return Object.assign({}, step, { w: nodeWidth(step.label), clusterH: NODE_H });
+  });
+
+  const maxClusterH = Math.max.apply(null, items.map(it => it.clusterH));
+  const hasCluster = items.some(it => it.kind);
+  const topPad = (p.loop ? 30 : 0) + (hasCluster ? 22 : 12);
+  const rowCenterY = topPad + maxClusterH / 2;
+  const bottomPad = p.loop ? 64 : 12;
+  const totalH = Math.round(rowCenterY + maxClusterH / 2 + bottomPad);
+
+  let x = 10;
+  const placed = items.map(it => {
+    const obj = Object.assign({}, it, { x, cx: x + it.w / 2 });
+    x += it.w + GAP_X;
+    return obj;
+  });
+  const totalW = Math.round(x - GAP_X + 10);
+
+  let edges = '';
+  let nodes = '';
+
+  placed.forEach(it => {
+    const labelCls = labelClass(it.cat);
+    if (it.kind) {
+      const n = it.members.length;
+      const groupX = it.x - 8, groupY = rowCenterY - it.clusterH / 2 - 8, groupW = it.w + 16, groupH = it.clusterH + 16;
+      nodes += `<rect class="group-box" x="${groupX}" y="${groupY}" width="${groupW}" height="${groupH}" rx="10"></rect>`;
+      const capLabel = it.kind === 'branch' ? 'choose one' : `×${n} parallel`;
+      nodes += `<text class="edge-label" x="${it.cx}" y="${groupY - 6}" style="fill:var(--amber)">${capLabel}</text>`;
+      let my = rowCenterY - it.clusterH / 2 + MEMBER_H / 2;
+      it.members.forEach(m => {
+        nodes += `<rect class="node node-${it.cat}" x="${it.x}" y="${my - MEMBER_H / 2}" width="${it.w}" height="${MEMBER_H}" rx="9"></rect>`;
+        nodes += `<text class="node-label ${labelCls}" x="${it.cx}" y="${my + 1}">${m}</text>`;
+        my += MEMBER_H + MEMBER_GAP_Y;
+      });
+    } else {
+      nodes += `<rect class="node node-${it.cat}" x="${it.x}" y="${rowCenterY - NODE_H / 2}" width="${it.w}" height="${NODE_H}" rx="10"></rect>`;
+      nodes += `<text class="node-label ${labelCls}" x="${it.cx}" y="${rowCenterY + 1}">${it.label}</text>`;
+    }
+  });
+
+  for (let i = 0; i < placed.length - 1; i++) {
+    const a = placed[i], b = placed[i + 1];
+    const aRight = a.x + a.w, bLeft = b.x;
+    if (!a.kind && !b.kind) {
+      edges += `<path class="edge" marker-end="url(#arrow)" d="M${aRight},${rowCenterY} L${bLeft},${rowCenterY}"></path>`;
+    } else if (a.kind && !b.kind) {
+      let my = rowCenterY - a.clusterH / 2 + MEMBER_H / 2;
+      const cls = a.kind === 'branch' ? 'edge edge-branch' : 'edge';
+      a.members.forEach(() => {
+        edges += `<path class="${cls}" marker-end="url(#arrow)" d="M${aRight + 8},${my} C${aRight + 24},${my} ${aRight + 24},${rowCenterY} ${bLeft},${rowCenterY}"></path>`;
+        my += MEMBER_H + MEMBER_GAP_Y;
+      });
+    } else if (!a.kind && b.kind) {
+      let my = rowCenterY - b.clusterH / 2 + MEMBER_H / 2;
+      const cls = b.kind === 'branch' ? 'edge edge-branch' : 'edge';
+      b.members.forEach(() => {
+        edges += `<path class="${cls}" marker-end="url(#arrow)" d="M${aRight},${rowCenterY} C${bLeft - 24},${rowCenterY} ${bLeft - 24},${my} ${bLeft - 8},${my}"></path>`;
+        my += MEMBER_H + MEMBER_GAP_Y;
+      });
+    } else {
+      const midX = (aRight + bLeft) / 2;
+      let myA = rowCenterY - a.clusterH / 2 + MEMBER_H / 2;
+      const clsA = a.kind === 'branch' ? 'edge edge-branch' : 'edge';
+      a.members.forEach(() => {
+        edges += `<path class="${clsA}" d="M${aRight + 8},${myA} C${aRight + 20},${myA} ${aRight + 20},${rowCenterY} ${midX},${rowCenterY}"></path>`;
+        myA += MEMBER_H + MEMBER_GAP_Y;
+      });
+      let myB = rowCenterY - b.clusterH / 2 + MEMBER_H / 2;
+      const clsB = b.kind === 'branch' ? 'edge edge-branch' : 'edge';
+      b.members.forEach(() => {
+        edges += `<path class="${clsB}" marker-end="url(#arrow)" d="M${midX},${rowCenterY} C${bLeft - 20},${rowCenterY} ${bLeft - 20},${myB} ${bLeft - 8},${myB}"></path>`;
+        myB += MEMBER_H + MEMBER_GAP_Y;
+      });
+    }
+  }
+
+  if (p.loop) {
+    const last = placed[placed.length - 1];
+    const target = placed[1];
+    const lastCx = last.x + last.w / 2;
+    const targetCx = target.x + target.w / 2;
+    const doneW = nodeWidth('Done');
+    const doneX = lastCx - doneW / 2;
+    const doneY = rowCenterY + NODE_H / 2 + 28;
+    nodes += `<rect class="node node-neutral" x="${doneX}" y="${doneY}" width="${doneW}" height="32" rx="10"></rect>`;
+    nodes += `<text class="node-label label-neutral" x="${lastCx}" y="${doneY + 17}">Done</text>`;
+    edges += `<path class="edge" marker-end="url(#arrow)" d="M${lastCx},${rowCenterY + NODE_H / 2} L${lastCx},${doneY - 4}"></path>`;
+    edges += `<text class="edge-label" x="${lastCx + 22}" y="${doneY - 8}">done</text>`;
+    const arcTopY = rowCenterY - NODE_H / 2 - 26;
+    edges += `<path class="edge edge-loop" marker-end="url(#arrow)" d="M${lastCx},${rowCenterY - NODE_H / 2} C${lastCx},${arcTopY} ${targetCx},${arcTopY} ${targetCx},${rowCenterY - NODE_H / 2 - 1}"></path>`;
+    nodes += `<text class="edge-label" x="${(lastCx + targetCx) / 2}" y="${arcTopY - 6}">↻ loop back to ${target.label}</text>`;
+  }
+
+  return `<svg class="diagram" viewBox="0 0 ${totalW} ${totalH}" xmlns="http://www.w3.org/2000/svg">${edges}${nodes}</svg>`;
+}
 
 function setTheme(t, btn) {
   document.body.classList.remove('theme-ocean','theme-slate','theme-warm');
@@ -737,7 +935,7 @@ function renderGrid() {
     card.setAttribute('role', 'listitem');
     card.setAttribute('aria-expanded', expandedIdx === p.origIdx ? 'true' : 'false');
 
-    const flowBadges = p.flow.map(f => `<span class="flow-badge">${f}</span>`).join('');
+    const flowBadges = p.flow.map(f => `<span class="flow-badge">${f.label}</span>`).join('');
 
     card.innerHTML = `
       <div class="card-head">
@@ -750,6 +948,10 @@ function renderGrid() {
       <div class="flow-row">${flowBadges}</div>
       <div class="expand-body" aria-hidden="${expandedIdx === p.origIdx ? 'false' : 'true'}">
         <button class="close-btn" aria-label="Close" onclick="event.stopPropagation(); toggleCard(${p.origIdx})">×</button>
+        <div class="expand-flow">
+          <div class="meta-title" style="margin-bottom:6px">Flow</div>
+          <div class="diagram-wrap">${flowDiagramSVG(p)}</div>
+        </div>
         <div class="expand-desc">
           ${p.desc}
           <div class="expand-uses"><strong>Common uses:</strong> ${p.uses}</div>
@@ -763,10 +965,6 @@ function renderGrid() {
           <div class="meta-row"><span class="meta-key">Agent count</span><span class="meta-val">${p.agents}</span></div>
           <div class="meta-row"><span class="meta-key">Loop type</span><span class="meta-val">${p.loops}</span></div>
           <div class="meta-row"><span class="meta-key">Statefulness</span><span class="meta-val">${p.statefulness}</span></div>
-          <div class="expand-flow">
-            <div class="meta-title" style="margin-bottom:6px">Flow</div>
-            <div class="flow-row">${flowBadges}</div>
-          </div>
         </div>
       </div>`;
 
