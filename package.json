@@ -4,6 +4,7 @@
   "private": true,
   "description": "Export tooling for the AI Agent Design Patterns interactive reference",
   "scripts": {
+    "validate": "node scripts/validate-patterns.js",
     "export:images": "node scripts/export-images.js",
     "export:pptx": "node scripts/export-pptx.js"
   },

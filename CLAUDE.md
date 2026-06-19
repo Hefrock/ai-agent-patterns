@@ -149,12 +149,14 @@ ai-agent-patterns/
 │   └── svg/
 │       └── pattern-*.svg
 ├── scripts/
+│   ├── validate-patterns.js
 │   ├── export-images.js
 │   ├── export-pptx.js
 │   └── export-pdf.js
 └── .github/
     └── workflows/
-        └── deploy.yml   ← GitHub Pages deploy action
+        ├── deploy.yml   ← GitHub Pages deploy action
+        └── ci.yml       ← PR validation (schema + export smoke test)
 ```
 
 ---
@@ -187,6 +189,31 @@ jobs:
       - id: deployment
         uses: actions/deploy-pages@v4
 ```
+
+---
+
+## GitHub Actions — PR validation
+
+Path: `.github/workflows/ci.yml`
+
+Runs on every pull request targeting `main`. Two layers of validation,
+both driven by loading `index.html` in headless Chromium so they exercise
+the real `PATTERNS` data and renderer rather than a separate copy:
+
+1. `npm run validate` (`scripts/validate-patterns.js`) — checks every
+   pattern against the schema documented above (required fields, valid
+   `cat`/`group`/`kind` enums, `members` present when `kind` is set,
+   no duplicate names, and that every distinct `statefulness` value has
+   a matching entry in `STATEFULNESS_INFO` so the tooltip never renders
+   empty).
+2. `npm run export:images` / `npm run export:pptx` — runs the real export
+   scripts end-to-end as a smoke test. A thrown error here means the
+   renderer or PATTERNS data broke something the schema check can't see
+   (e.g. a layout exception), not just a malformed field.
+
+This does not catch visual regressions (e.g. a node clipped at the edge
+of its SVG `viewBox`) — only crashes and schema violations. Visual
+changes to the diagrams still need a manual screenshot check.
 
 ---
 
