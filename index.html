@@ -941,6 +941,25 @@ function toggleCard(idx) {
   }
 }
 
+function deepDivePrompt(p) {
+  const flowText = p.flow.map(f => f.label).join(' → ') + (p.loop ? ' → (loop) → Done' : '');
+  return `Explain the "${p.name}" AI agent design pattern with a real implementation example.\n\n`
+    + `Context: ${p.desc}\n`
+    + `Typical flow: ${flowText}\n`
+    + `Common uses: ${p.uses}`;
+}
+
+function copyDeepDive(idx, btn) {
+  const text = deepDivePrompt(PATTERNS[idx]);
+  const reset = (label) => {
+    btn.textContent = label;
+    setTimeout(() => { btn.textContent = 'Deep dive ↗'; }, 1600);
+  };
+  navigator.clipboard.writeText(text)
+    .then(() => reset('Copied ✓'))
+    .catch(() => reset('Copy failed'));
+}
+
 function renderGrid() {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
@@ -986,7 +1005,7 @@ function renderGrid() {
         <div class="expand-desc">
           ${p.desc}
           <div class="expand-uses"><strong>Common uses:</strong> ${p.uses}</div>
-          <button class="deep-btn" onclick="event.stopPropagation(); alert('Open this in Claude chat to deep dive: \'Explain the ${p.name} pattern with a real implementation example\'')">
+          <button class="deep-btn" onclick="event.stopPropagation(); copyDeepDive(${p.origIdx}, this)">
             Deep dive ↗
           </button>
         </div>
