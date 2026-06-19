@@ -350,6 +350,31 @@
   .meta-key { color: var(--text-tertiary); }
   .meta-val { font-weight: 600; color: var(--text-primary); }
 
+  .meta-val[data-tip] {
+    cursor: help;
+    border-bottom: 1px dotted var(--text-tertiary);
+    position: relative;
+  }
+  .meta-val[data-tip]:hover::after,
+  .meta-val[data-tip]:focus::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: 100%;
+    right: 0;
+    margin-bottom: 8px;
+    width: 200px;
+    padding: 9px 11px;
+    background: var(--text-primary);
+    color: var(--bg);
+    font-size: 11px;
+    font-weight: 400;
+    line-height: 1.45;
+    border-radius: var(--radius-sm);
+    box-shadow: 0 6px 18px rgba(0,0,0,.2);
+    z-index: 20;
+    white-space: normal;
+  }
+
   .expand-flow {
     grid-column: 1 / -1;
   }
@@ -484,6 +509,12 @@
 </main>
 
 <script>
+const STATEFULNESS_INFO = {
+  Stateless: 'No memory between calls — each invocation starts fresh, with no awareness of prior turns or runs.',
+  Stateful: 'Holds context for the life of a single session or run, but that state is discarded once it ends.',
+  Persistent: 'Stores memory durably across sessions, so context carries forward between separate runs.',
+};
+
 const PATTERNS = [
   {
     section: "Single-agent — stateless",
@@ -964,7 +995,7 @@ function renderGrid() {
           <div class="meta-row"><span class="meta-key">Complexity</span><span class="meta-val">${p.complexity}</span></div>
           <div class="meta-row"><span class="meta-key">Agent count</span><span class="meta-val">${p.agents}</span></div>
           <div class="meta-row"><span class="meta-key">Loop type</span><span class="meta-val">${p.loops}</span></div>
-          <div class="meta-row"><span class="meta-key">Statefulness</span><span class="meta-val">${p.statefulness}</span></div>
+          <div class="meta-row"><span class="meta-key">Statefulness</span><span class="meta-val" data-tip="${STATEFULNESS_INFO[p.statefulness] || ''}" tabindex="0">${p.statefulness}</span></div>
         </div>
       </div>`;
 
