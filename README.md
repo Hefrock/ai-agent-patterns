@@ -5,16 +5,15 @@
 **Live site:** https://hefrock.github.io/ai-agent-patterns/ <!-- placeholder until GitHub Pages is enabled (Settings → Pages → Deploy from branch → main / root) -->
 
 An interactive reference of AI agent design patterns — single-agent and
-multi-agent architectures — covering 18 patterns across 8 sections. Built as
-a single self-contained `index.html` with no build step and no external
-dependencies. Click any card to expand it and see a colored flow diagram,
+multi-agent architectures — covering 18 patterns across 8 sections. 
+Click any card to expand it and see a colored flow diagram,
 its description, common uses, and at-a-glance metadata (complexity, agent
 count, loop type, statefulness — hover any statefulness value for an
 explanation). The "Deep dive" button copies a ready-to-paste prompt
 (pattern name, description, flow, and common uses) to your clipboard for
-following up in a Claude conversation.
+following up in a LLM conversation.
 
-The same `index.html` is the source of truth for every other export format
+The `index.html` is the source of truth for every other export format
 in this repo (LinkedIn images, PPTX slides, PDF, per-pattern SVGs) — all of
 them render directly from the `PATTERNS` array defined in that file.
 
