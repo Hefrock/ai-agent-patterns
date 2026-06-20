@@ -564,6 +564,24 @@ const PATTERNS = [
     ]
   },
   {
+    section: "Single-agent — stateless",
+    group: "single",
+    name: "Parallelization",
+    sub: "Concurrent subtasks, then merge",
+    cat: "llm", catLabel: "LLM core",
+    desc: "A task is split into independent subtasks decided in advance (sectioning), or the same prompt is run multiple times in parallel (ensemble voting). All calls execute concurrently; an aggregator merges the sections, or a vote picks the majority answer. Simpler and faster than dynamic orchestration since the subtasks never change at runtime.",
+    uses: "Document section summarization, parallel moderation checks, majority-vote fact-checking",
+    complexity: "Low – Med",
+    agents: "1",
+    loops: "None",
+    statefulness: "Stateless",
+    flow: [
+      {label:"Input", cat:"neutral"},
+      {label:"Calls", cat:"llm", kind:"parallel", members:["Call 1","Call 2","Call 3"]},
+      {label:"Aggregate / vote", cat:"data"}, {label:"Output", cat:"neutral"}
+    ]
+  },
+  {
     section: "Single-agent — agentic",
     group: "single",
     name: "ReAct loop",
@@ -791,7 +809,7 @@ let currentFilter = 'all';
 let currentLabels = 'full';
 
 /* ── Flow diagram (SVG) renderer ──
-   Generic, data-driven layout so all 15 patterns render with identical
+   Generic, data-driven layout so all patterns render with identical
    spacing/sizing rules. Handles plain sequences, parallel fan-out/fan-in
    clusters, exclusive-OR branch clusters, and loop-back-with-done. */
 const NODE_H = 40, GAP_X = 34, MEMBER_H = 34, MEMBER_GAP_Y = 9;

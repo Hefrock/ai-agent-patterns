@@ -5,7 +5,7 @@
 **Live site:** https://hefrock.github.io/ai-agent-patterns/ <!-- placeholder until GitHub Pages is enabled (Settings → Pages → Deploy from branch → main / root) -->
 
 An interactive reference of AI agent design patterns — single-agent and
-multi-agent architectures — covering 15 patterns across 8 sections. Built as
+multi-agent architectures — covering 16 patterns across 8 sections. Built as
 a single self-contained `index.html` with no build step and no external
 dependencies. Click any card to expand it and see a colored flow diagram,
 its description, common uses, and at-a-glance metadata (complexity, agent
@@ -28,6 +28,7 @@ them render directly from the `PATTERNS` array defined in that file.
 ### Single-agent — stateless
 - **Simple LLM call** — One prompt, one response
 - **Prompt chaining** — Sequential LLM steps
+- **Parallelization** — Concurrent subtasks, then merge
 
 ### Single-agent — agentic
 - **ReAct loop** — Reason · act · observe
