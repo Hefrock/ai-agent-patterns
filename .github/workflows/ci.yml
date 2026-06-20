@@ -15,3 +15,5 @@ jobs:
       - run: npm run validate
       - run: npm run export:images
       - run: npm run export:pptx
+      - run: npm run export:pdf
+      - run: npm run export:svg

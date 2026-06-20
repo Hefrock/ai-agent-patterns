@@ -103,6 +103,11 @@ tooltip on the "At a glance" panel's Statefulness row. Every distinct
 `statefulness` value used in `PATTERNS` must have an entry here —
 `scripts/validate-patterns.js` enforces this.
 
+The tooltip text is also exposed to assistive tech: the Statefulness value
+has `aria-describedby` pointing at a visually-hidden (`.sr-only`) span
+holding the same string, since the `data-tip`/`::after` CSS tooltip content
+isn't reliably read by screen readers on its own.
+
 ### Deep dive button
 
 Each expanded card has a "Deep dive" button (`copyDeepDive` /
@@ -141,11 +146,20 @@ Color each slide accent from the token system.
 Output: `exports/ai-agent-patterns.pptx`
 
 ### 4. PDF export
-Use Playwright to print `index.html` to PDF.
+Script target: `export-pdf.js`. Opens `index.html`, switches to `print`
+media emulation (a `@media print` block in `index.html` hides the toolbar
+and keeps cards from splitting across page breaks), and prints to A4 via
+Playwright's `page.pdf()`.
 Output: `exports/ai-agent-patterns.pdf`
 
 ### 5. SVG per pattern card
-Extract each card as a standalone SVG for embedding in docs/slides.
+Script target: `export-svg.js`. Expands each card in turn and pulls its
+`svg.diagram` flow diagram (the same SVG shown on the page), then bakes
+every element's resolved `fill`/`stroke`/`font-*`/`filter` etc. into
+inline `style` attributes via `getComputedStyle` and inlines the shared
+`#arrow` marker and `#nodeShadow` filter `<defs>` — so each file has zero
+dependency on `index.html`'s stylesheet or CSS custom properties and
+renders correctly opened on its own or pasted into docs/slides.
 Output: `exports/svg/pattern-{slug}.svg`
 
 ---
@@ -171,7 +185,8 @@ ai-agent-patterns/
 │   ├── validate-patterns.js
 │   ├── export-images.js
 │   ├── export-pptx.js
-│   └── export-pdf.js
+│   ├── export-pdf.js
+│   └── export-svg.js
 └── .github/
     └── workflows/
         ├── deploy.yml   ← GitHub Pages deploy action
@@ -225,10 +240,11 @@ the real `PATTERNS` data and renderer rather than a separate copy:
    no duplicate names, and that every distinct `statefulness` value has
    a matching entry in `STATEFULNESS_INFO` so the tooltip never renders
    empty).
-2. `npm run export:images` / `npm run export:pptx` — runs the real export
-   scripts end-to-end as a smoke test. A thrown error here means the
-   renderer or PATTERNS data broke something the schema check can't see
-   (e.g. a layout exception), not just a malformed field.
+2. `npm run export:images` / `npm run export:pptx` / `npm run export:pdf` /
+   `npm run export:svg` — runs all four real export scripts end-to-end as
+   a smoke test. A thrown error here means the renderer or PATTERNS data
+   broke something the schema check can't see (e.g. a layout exception),
+   not just a malformed field.
 
 This does not catch visual regressions (e.g. a node clipped at the edge
 of its SVG `viewBox`) — only crashes and schema violations. Visual

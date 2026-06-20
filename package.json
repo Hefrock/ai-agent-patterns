@@ -6,7 +6,9 @@
   "scripts": {
     "validate": "node scripts/validate-patterns.js",
     "export:images": "node scripts/export-images.js",
-    "export:pptx": "node scripts/export-pptx.js"
+    "export:pptx": "node scripts/export-pptx.js",
+    "export:pdf": "node scripts/export-pdf.js",
+    "export:svg": "node scripts/export-svg.js"
   },
   "devDependencies": {
     "playwright": "^1.47.0",
