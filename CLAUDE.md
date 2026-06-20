@@ -60,7 +60,7 @@ hardcode any hex values outside the token definitions.
 
 ## Pattern data
 
-16 patterns across 8 sections. All defined in the `PATTERNS` array in
+18 patterns across 8 sections. All defined in the `PATTERNS` array in
 `index.html`. Fields per pattern:
 
 ```js

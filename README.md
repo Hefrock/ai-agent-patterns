@@ -5,7 +5,7 @@
 **Live site:** https://hefrock.github.io/ai-agent-patterns/ <!-- placeholder until GitHub Pages is enabled (Settings → Pages → Deploy from branch → main / root) -->
 
 An interactive reference of AI agent design patterns — single-agent and
-multi-agent architectures — covering 16 patterns across 8 sections. Built as
+multi-agent architectures — covering 18 patterns across 8 sections. Built as
 a single self-contained `index.html` with no build step and no external
 dependencies. Click any card to expand it and see a colored flow diagram,
 its description, common uses, and at-a-glance metadata (complexity, agent
@@ -35,9 +35,11 @@ them render directly from the `PATTERNS` array defined in that file.
 - **Plan-and-execute** — Separate planner and executor
 - **Tool-use / function calling** — LLM with tool registry
 - **Critic / self-refinement** — Generator + critic loop
+- **Tree of Thoughts** — Explore, evaluate, backtrack
 
 ### Single-agent — memory
 - **RAG pattern** — Retrieve then reason
+- **Agentic RAG** — Iterative retrieve, reason, refine
 - **Memory-augmented agent** — Short, long & episodic memory
 
 ### Single-agent — reactive

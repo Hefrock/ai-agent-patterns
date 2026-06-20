@@ -648,6 +648,23 @@ const PATTERNS = [
     ]
   },
   {
+    section: "Single-agent — agentic",
+    group: "single",
+    name: "Tree of Thoughts",
+    sub: "Explore, evaluate, backtrack",
+    cat: "llm", catLabel: "LLM core",
+    desc: "Instead of committing to a single reasoning chain, the model generates several candidate next-step thoughts at each point, evaluates how promising each one is, and searches the resulting tree — expanding the best branches and backtracking from dead ends — until it finds a path that solves the problem. Trades extra inference calls for much better performance on problems with large or deceptive solution spaces.",
+    uses: "Math and logic puzzles, multi-step planning, creative generation with backtracking",
+    complexity: "High",
+    agents: "1",
+    loops: "Until solution found",
+    statefulness: "Stateful",
+    loop: true,
+    flow: [
+      {label:"Problem", cat:"neutral"}, {label:"Branch out", cat:"llm"}, {label:"Evaluate paths", cat:"data"}, {label:"Promising?", cat:"llm"}
+    ]
+  },
+  {
     section: "Single-agent — memory",
     group: "single",
     name: "RAG pattern",
@@ -661,6 +678,23 @@ const PATTERNS = [
     statefulness: "Stateless",
     flow: [
       {label:"Query", cat:"neutral"}, {label:"Retriever", cat:"data"}, {label:"Context", cat:"data"}, {label:"LLM", cat:"llm"}, {label:"Answer", cat:"neutral"}
+    ]
+  },
+  {
+    section: "Single-agent — memory",
+    group: "single",
+    name: "Agentic RAG",
+    sub: "Iterative retrieve, reason, refine",
+    cat: "data", catLabel: "Data / memory",
+    desc: "Retrieval becomes a tool the agent calls repeatedly rather than a fixed pre-processing step: the model decomposes a complex question into sub-queries, retrieves, evaluates whether the returned context is sufficient, and either reformulates the query and retrieves again or moves on to generate the final answer. Handles multi-hop questions a single retrieve-then-generate pass cannot.",
+    uses: "Multi-hop QA, deep research agents, complex knowledge-base queries",
+    complexity: "High",
+    agents: "1",
+    loops: "Until context sufficient",
+    statefulness: "Stateful",
+    loop: true,
+    flow: [
+      {label:"Query", cat:"neutral"}, {label:"Decompose", cat:"llm"}, {label:"Retrieve", cat:"data"}, {label:"Sufficient?", cat:"llm"}
     ]
   },
   {
