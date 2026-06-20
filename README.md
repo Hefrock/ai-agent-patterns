@@ -15,8 +15,8 @@ explanation). The "Deep dive" button copies a ready-to-paste prompt
 following up in a Claude conversation.
 
 The same `index.html` is the source of truth for every other export format
-in this repo (LinkedIn images, PPTX slides, PDF) — all of them render
-directly from the `PATTERNS` array defined in that file.
+in this repo (LinkedIn images, PPTX slides, PDF, per-pattern SVGs) — all of
+them render directly from the `PATTERNS` array defined in that file.
 
 ![Site preview](docs/preview.png)
 <!-- Static snapshot for GitHub's README renderer. Regenerate with
@@ -68,11 +68,13 @@ npx playwright install chromium
 npm run validate         # checks PATTERNS against the schema in CLAUDE.md
 npm run export:images    # exports/linkedin-{all,single,multi}.png + exports/card-{slug}.png
 npm run export:pptx      # exports/ai-agent-patterns.pptx
+npm run export:pdf       # exports/ai-agent-patterns.pdf
+npm run export:svg       # exports/svg/pattern-{slug}.svg — standalone, no external CSS
 ```
 
-`npm run validate` and both export scripts also run on every pull request
-via `.github/workflows/ci.yml`, so a malformed pattern or a renderer crash
-is caught before merge.
+`npm run validate` and all four export scripts also run on every pull
+request via `.github/workflows/ci.yml`, so a malformed pattern or a
+renderer crash is caught before merge.
 
 ## Project structure
 
@@ -88,11 +90,15 @@ ai-agent-patterns/
 │   ├── linkedin-single.png
 │   ├── linkedin-multi.png
 │   ├── card-*.png
-│   └── ai-agent-patterns.pptx
+│   ├── ai-agent-patterns.pptx
+│   ├── ai-agent-patterns.pdf
+│   └── svg/pattern-*.svg
 ├── scripts/
 │   ├── validate-patterns.js
 │   ├── export-images.js
-│   └── export-pptx.js
+│   ├── export-pptx.js
+│   ├── export-pdf.js
+│   └── export-svg.js
 └── .github/workflows/
     ├── deploy.yml                  ← GitHub Pages deploy action
     └── ci.yml                      ← PR validation (schema + export smoke test)

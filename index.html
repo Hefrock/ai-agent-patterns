@@ -355,6 +355,14 @@
     border-bottom: 1px dotted var(--text-tertiary);
     position: relative;
   }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
   .meta-val[data-tip]:hover::after,
   .meta-val[data-tip]:focus::after {
     content: attr(data-tip);
@@ -428,6 +436,13 @@
   .compact .card-sub  { display: none; }
   .compact .flow-row  { display: none; }
   .compact .card-name { font-size: 12px; }
+
+  /* ── Print (used by scripts/export-pdf.js) ── */
+  @media print {
+    .toolbar { display: none; }
+    .card { break-inside: avoid; }
+    .section-row { break-after: avoid; }
+  }
 </style>
 </head>
 <body>
@@ -503,7 +518,7 @@
   <!-- Footer -->
   <footer class="site-footer">
     <span>AI Agent Design Patterns · Interactive Reference</span>
-    <span>Click any card to expand · Built with Claude</span>
+    <span>Click any card to expand</span>
   </footer>
 
 </main>
@@ -1014,7 +1029,7 @@ function renderGrid() {
           <div class="meta-row"><span class="meta-key">Complexity</span><span class="meta-val">${p.complexity}</span></div>
           <div class="meta-row"><span class="meta-key">Agent count</span><span class="meta-val">${p.agents}</span></div>
           <div class="meta-row"><span class="meta-key">Loop type</span><span class="meta-val">${p.loops}</span></div>
-          <div class="meta-row"><span class="meta-key">Statefulness</span><span class="meta-val" data-tip="${STATEFULNESS_INFO[p.statefulness] || ''}" tabindex="0">${p.statefulness}</span></div>
+          <div class="meta-row"><span class="meta-key">Statefulness</span><span class="meta-val" data-tip="${STATEFULNESS_INFO[p.statefulness] || ''}" aria-describedby="statefulness-tip-${p.origIdx}" tabindex="0">${p.statefulness}</span><span id="statefulness-tip-${p.origIdx}" class="sr-only">${STATEFULNESS_INFO[p.statefulness] || ''}</span></div>
         </div>
       </div>`;
 
