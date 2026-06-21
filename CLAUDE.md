@@ -73,7 +73,7 @@ hardcode any hex values outside the token definitions.
   catLabel: string,
   desc: string,         // full description (shown on expand)
   uses: string,         // common use cases
-  complexity: string,   // Low / Medium / High / Very high
+  complexity: string,   // Low / Low – Med / Medium / High / Very high
   agents: string,       // count or range
   loops: string,
   statefulness: string,
