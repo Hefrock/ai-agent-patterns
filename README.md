@@ -2,7 +2,7 @@
 
 [![Deploy to GitHub Pages](https://github.com/hefrock/ai-agent-patterns/actions/workflows/deploy.yml/badge.svg)](https://github.com/hefrock/ai-agent-patterns/actions/workflows/deploy.yml)
 
-**Live site:** https://hefrock.github.io/ai-agent-patterns/ <!-- placeholder until GitHub Pages is enabled (Settings → Pages → Deploy from branch → main / root) -->
+**Live site:** https://hefrock.github.io/ai-agent-patterns/
 
 An interactive reference of AI agent design patterns — single-agent and
 multi-agent architectures — covering 18 patterns across 8 sections. 
