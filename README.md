@@ -108,4 +108,4 @@ ai-agent-patterns/
 
 ## License
 
-MIT
+[MIT](LICENSE)
