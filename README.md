@@ -5,7 +5,7 @@
 **Live site:** https://hefrock.github.io/ai-agent-patterns/
 
 An interactive reference of AI agent design patterns — single-agent and
-multi-agent architectures — covering 18 patterns across 8 sections. 
+multi-agent architectures — covering 19 patterns across 9 sections. 
 Click any card to expand it and see a colored flow diagram,
 its description, common uses, and at-a-glance metadata (complexity, agent
 count, loop type, statefulness — hover any statefulness value for an
@@ -43,6 +43,9 @@ them render directly from the `PATTERNS` array defined in that file.
 
 ### Single-agent — reactive
 - **Event-driven / reactive** — Trigger-based activation
+
+### Single-agent — oversight
+- **Human-in-the-loop** — Pause for approval before acting
 
 ### Multi-agent — cooperative
 - **Orchestrator-worker** — Fan-out · fan-in
