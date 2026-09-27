@@ -730,6 +730,23 @@ const PATTERNS = [
     ]
   },
   {
+    section: "Single-agent — oversight",
+    group: "single",
+    name: "Human-in-the-loop",
+    sub: "Pause for approval before acting",
+    cat: "tool", catLabel: "Tool / action",
+    desc: "The agent runs autonomously up to a designated checkpoint — typically just before an irreversible or high-stakes action, such as a payment, a production deploy, or a customer-facing message — then pauses and surfaces its proposed action for a human to approve, edit, or reject. Approval resumes the run from that exact point rather than starting over; rejection sends the agent back to revise and re-propose. Turns autonomy into a dial instead of a switch: the same agent can run unattended on low-stakes steps and gated on high-stakes ones.",
+    uses: "Financial transactions, production deploys, customer-facing messages, compliance-sensitive actions, irreversible data changes",
+    complexity: "Medium",
+    agents: "1",
+    loops: "Until approved",
+    statefulness: "Stateful",
+    loop: true,
+    flow: [
+      {label:"Task", cat:"neutral"}, {label:"Agent proposes", cat:"llm"}, {label:"Human review", cat:"data"}, {label:"Approved?", cat:"llm"}
+    ]
+  },
+  {
     section: "Multi-agent — cooperative",
     group: "multi",
     name: "Orchestrator-worker",
